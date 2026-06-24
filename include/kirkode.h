@@ -1,10 +1,17 @@
 #pragma once
 
-/*
-* ==== KIRKODE LIBRARY ====
-* Version: 2.5
-* Updated: June 23st, 2026
-*/
+// =========================================================================================
+// KIRKODE LIBRARY
+// =========================================================================================
+// Version: 2.5
+// Updated: June 23rd, 2026
+
+// #include <kirkode_types.h> -> Lightweight header to include in header files.
+// #include <kirkode.h> -------> Full include header for source files.
+
+// =========================================================================================
+// Uncomment defines below to exclude unwanted features. 
+// =========================================================================================
 
 //#define KIR_EXCLUDE_LOG // -------> Excludes kir::log.
 //#define KIR_EXCLUDE_CLOCK // -----> Excludes kir::clock and kir::stopwatch.
@@ -13,6 +20,8 @@
 //#define KIR_EXCLUDE_STR // -------> Excludes kir::str.
 
 //#define KIR_LOG_THREADED // ------> Enables logging to be safe across multiple threads.
+
+// =========================================================================================
 
 #ifndef KIR_EXCLUDE_LOG
 #include "impl/kirkode_log.hpp"
