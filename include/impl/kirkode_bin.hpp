@@ -6,6 +6,7 @@
 #include <cstring> // std::memcpy
 #include <type_traits> // std::is_integral
 #include <limits> // std::numeric_limits
+#include <stdexcept> // std::invalid_argument
 
 #ifdef max
 #undef max // Ensures std::numeric_limits<T>::max() is available.
@@ -191,19 +192,19 @@ namespace kir {
 		 *
 		 * \param buffer: Source byte buffer.
 		 * \param offset: Position in buffer.
-		 * \param success: Optional output flag indicating success or failure.
+		 * \param outSuccess: Optional output flag indicating success or failure.
 		 *
 		 * \return Decoded integer value, or 0 on failure.
 		 */
 		template <typename IntType>
-		[[nodiscard("kir::bin::unpack_int_at_r() is useless without use of its return value.")]]
-		static IntType unpack_int_at_r(const kir::bytes& buffer, const size_t offset, bool* success = nullptr) noexcept {
+		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
+		static IntType unpack_int_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
 			IntType out = 0;
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
-				if (success) *success = false;
+				if (outSuccess) *outSuccess = false;
 				return 0;
 			}
-			if (success) *success = true;
+			if (outSuccess) *outSuccess = true;
 			return out;
 		}
 
@@ -215,19 +216,19 @@ namespace kir {
 		 *
 		 * \param offset: Position in buffer (will be advanced on success).
 		 * \param buffer: Source byte buffer.
-		 * \param success: Optional output flag indicating success or failure.
+		 * \param outSuccess: Optional output flag indicating success or failure.
 		 *
 		 * \return Decoded integer value, or 0 on failure.
 		 */
 		template <typename IntType>
-		static IntType unpack_int_at_r(size_t& offset, const kir::bytes& buffer, bool* success = nullptr) noexcept {
+		static IntType unpack_int_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
 			IntType out = 0;
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
-				if (success) *success = false;
+				if (outSuccess) *outSuccess = false;
 				return 0;
 			}
 			offset += sizeof(IntType);
-			if (success) *success = true;
+			if (outSuccess) *outSuccess = true;
 			return out;
 		}
 
@@ -245,7 +246,7 @@ namespace kir {
 		 * \throws std::invalid_argument If the buffer is too small.
 		 */
 		template <typename IntType>
-		[[nodiscard("kir::bin::unpack_int_at_e() is useless without use of its return value.")]]
+		[[nodiscard("kir::bin::unpack_int_at_e() is pointless without use of its return value.")]]
 		static IntType unpack_int_at_e(const kir::bytes& buffer, const size_t offset) {
 			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at_e only supports integral types!");
 			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at_e only supports types smaller than 0xFF!");
@@ -401,19 +402,19 @@ namespace kir {
 		 *
 		 * \param buffer: Source byte buffer.
 		 * \param offset: Position in buffer.
-		 * \param success: Optional output flag indicating success or failure.
+		 * \param outSuccess: Optional output flag indicating success or failure.
 		 *
 		 * \return Decoded value, or 0.0f on failure.
 		 */
 		template <typename FloatType = float>
-		[[nodiscard("kir::bin::unpack_float_at_r() is useless without use of its return value.")]]
-		static FloatType unpack_float_at_r(const kir::bytes& buffer, const size_t offset, bool* success = nullptr) noexcept {
+		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
+		static FloatType unpack_float_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
 			FloatType out = 0.0f;
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
-				if (success) *success = false;
+				if (outSuccess) *outSuccess = false;
 				return 0.0f;
 			}
-			if (success) *success = true;
+			if (outSuccess) *outSuccess = true;
 			return out;
 		}
 
@@ -425,19 +426,19 @@ namespace kir {
 		 *
 		 * \param offset: Position in buffer (will be advanced on success).
 		 * \param buffer: Source byte buffer.
-		 * \param success: Optional output flag indicating success or failure.
+		 * \param outSuccess: Optional output flag indicating success or failure.
 		 *
 		 * \return Decoded value, or 0.0f on failure.
 		 */
 		template <typename FloatType = float>
-		static FloatType unpack_float_at_r(size_t& offset, const kir::bytes& buffer, bool* success = nullptr) noexcept {
+		static FloatType unpack_float_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
 			FloatType out = 0.0f;
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
-				if (success) *success = false;
+				if (outSuccess) *outSuccess = false;
 				return 0.0f;
 			}
 			offset += sizeof(FloatType);
-			if (success) *success = true;
+			if (outSuccess) *outSuccess = true;
 			return out;
 		}
 
@@ -455,7 +456,7 @@ namespace kir {
 		 * \throws std::invalid_argument: Buffer does not contain enough data.
 		 */
 		template <typename FloatType = float>
-		[[nodiscard("kir::bin::unpack_float_at_e() is useless without use of its return value.")]]
+		[[nodiscard("kir::bin::unpack_float_at_e() is pointless without use of its return value.")]]
 		static FloatType unpack_float_at_e(const kir::bytes& buffer, const size_t offset) {
 			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at_e only supports floating point types!");
 			if (offset + sizeof(FloatType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
@@ -602,7 +603,7 @@ namespace kir {
 		 */
 		template <typename SizeType = uint16_t>
 		static bool unpack_str_at(size_t& offset, const kir::bytes& buffer, std::string& out) noexcept {
-			if (!unpack_str_at(buffer, offset, out)) {
+			if (!unpack_str_at<SizeType>(buffer, offset, out)) {
 				return false;
 			}
 			offset += sizeof(SizeType) + out.size();
