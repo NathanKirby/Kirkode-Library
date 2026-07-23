@@ -1,4 +1,4 @@
-# KirKode Library v2.5
+# KirKode Library v2.6
 This is a static library built and maintained by Nathan Kirby for various projects under development by **KirKode Development**.
 
 ## Requirements
@@ -12,6 +12,8 @@ This is a static library built and maintained by Nathan Kirby for various projec
 - Epoch & stopwatch utilities
 - Random value helpers
 - String filtering
+- File management
+- Base64/Base64url encoding
 
 ## Use Cases
 - UDP/TCP network packet serialization
