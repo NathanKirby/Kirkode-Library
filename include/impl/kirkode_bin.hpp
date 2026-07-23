@@ -342,7 +342,7 @@ namespace kir {
 		 * \return true if successful, false on allocation failure.
 		 */
 		template <typename FloatType = float>
-		static bool pack_float(kir::bytes& buffer, const size_t offset) noexcept {
+		static bool pack_float(kir::bytes& buffer, const FloatType value) noexcept {
 			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::pack_float only supports floating point types!");
 			const size_t oldSize = buffer.size();
 			try {
