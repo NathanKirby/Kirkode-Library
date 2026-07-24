@@ -58,16 +58,14 @@ namespace kir {
 			if (offset + sizeof(IntType) > buffer.size()) return false;
 			if constexpr (std::is_signed<IntType>::value) {
 				using UIntType = std::make_unsigned_t<IntType>;
-				UIntType unsignedValue = static_cast<UIntType>(value);
+				const UIntType unsignedValue = static_cast<UIntType>(value);
 				for (uint8_t i = 0; i < sizeof(IntType); ++i) {
-					buffer[offset + i] = static_cast<kir::byte>(unsignedValue & 0xFF);
-					unsignedValue >>= 8;
+					buffer[offset + i] = static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF);
 				}
 			}
 			else {
 				for (uint8_t i = 0; i < sizeof(IntType); ++i) {
-					buffer[offset + i] = static_cast<kir::byte>(value & 0xFF);
-					value >>= 8;
+					buffer[offset + i] = static_cast<kir::byte>((value >> (i * 8)) & 0xFF);
 				}
 			}
 			return true;
@@ -115,16 +113,14 @@ namespace kir {
 				buffer.reserve(buffer.size() + sizeof(IntType));
 				if constexpr (std::is_signed<IntType>::value) {
 					using UIntType = std::make_unsigned_t<IntType>;
-					UIntType unsignedValue = static_cast<UIntType>(value);
+					const UIntType unsignedValue = static_cast<UIntType>(value);
 					for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
-						buffer.push_back(static_cast<kir::byte>(unsignedValue & 0xFF));
-						unsignedValue >>= 8;
+						buffer.push_back(static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF));
 					}
 				}
 				else {
 					for (uint8_t i = 0; i < sizeof(IntType); ++i) {
-						buffer.push_back(static_cast<kir::byte>(value & 0xFF));
-						value >>= 8;
+						buffer.push_back(static_cast<kir::byte>((value >> (i * 8)) & 0xFF));
 					}
 				}
 			}
