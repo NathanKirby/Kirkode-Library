@@ -8,10 +8,6 @@
 #include <limits> // std::numeric_limits
 #include <stdexcept> // std::invalid_argument
 
-#ifdef max
-#undef max // Ensures std::numeric_limits<T>::max() is available.
-#endif
-
 namespace kir {
 	/**
 	 * \brief Binary serialization and deserialization utilities.
@@ -499,7 +495,7 @@ namespace kir {
 		static bool pack_str_at(kir::bytes& buffer, const size_t offset, const std::string& str) noexcept {
 			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str_at only supports unsigned integral types!");
 			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str_at only supports unsigned integral types!");
-			if (std::numeric_limits<SizeType>::max() < str.size()) return false;
+			if ((std::numeric_limits<SizeType>::max)() < str.size()) return false;
 			const SizeType len = static_cast<SizeType>(str.size());
 			if (offset + sizeof(SizeType) + len > buffer.size()) return false;
 			std::memcpy(buffer.data() + offset, &len, sizeof(SizeType));
@@ -547,7 +543,7 @@ namespace kir {
 		static bool pack_str(kir::bytes& buffer, const std::string& str) noexcept {
 			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str only supports unsigned integral types!");
 			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str only supports unsigned integral types!");
-			if (std::numeric_limits<SizeType>::max() < str.size()) return false;
+			if ((std::numeric_limits<SizeType>::max)() < str.size()) return false;
 			const SizeType len = static_cast<SizeType>(str.size());
 			const size_t bufferLen = buffer.size();
 			try { buffer.resize(bufferLen + sizeof(SizeType) + len); }
