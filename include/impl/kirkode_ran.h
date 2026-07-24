@@ -6,10 +6,6 @@
 #include <type_traits> // std::is_integral
 #include <limits> // std::numeric_limits
 
-#ifdef max
-#undef max // Ensures std::numeric_limits<T>::max() is available.
-#endif
-
 namespace kir {
 	/**
 	 * \class ran
@@ -40,15 +36,15 @@ namespace kir {
 			static_assert(std::is_integral<IntType>::value, "random_int only supports integral types!");
 			if constexpr (std::is_signed<IntType>::value) {
 				std::uniform_int_distribution<int64_t> dist(
-					std::numeric_limits<IntType>::min(),
-					std::numeric_limits<IntType>::max()
+					(std::numeric_limits<IntType>::min)(),
+					(std::numeric_limits<IntType>::max)()
 				);
 				return static_cast<IntType>(dist(engine));
 			}
 			else {
 				std::uniform_int_distribution<uint64_t> dist(
 					0,
-					std::numeric_limits<IntType>::max()
+					(std::numeric_limits<IntType>::max)()
 				);
 				return static_cast<IntType>(dist(engine));
 			}
@@ -72,7 +68,7 @@ namespace kir {
 			static_assert(std::is_integral<IntType>::value, "random_int only supports integral types!");
 			if constexpr (std::is_signed<IntType>::value) {
 				std::uniform_int_distribution<int64_t> dist(
-					std::numeric_limits<IntType>::min(),
+					(std::numeric_limits<IntType>::min)(),
 					max
 				);
 				return static_cast<IntType>(dist(engine));
@@ -130,8 +126,8 @@ namespace kir {
 		static FloatType random_float() noexcept {
 			static_assert(std::is_floating_point<FloatType>::value, "random_float only supports floating point types!");
 			std::uniform_real_distribution<double> dist(
-				std::numeric_limits<FloatType>::min(), 
-				std::numeric_limits<FloatType>::max()
+				(std::numeric_limits<FloatType>::min)(), 
+				(std::numeric_limits<FloatType>::max)()
 			);
 			return static_cast<FloatType>(dist(engine));
 		}
@@ -153,7 +149,7 @@ namespace kir {
 		static FloatType random_float(const FloatType max) noexcept {
 			static_assert(std::is_floating_point<FloatType>::value, "random_float only supports floating point types!");
 			std::uniform_real_distribution<double> dist(
-				std::numeric_limits<FloatType>::min(),
+				(std::numeric_limits<FloatType>::min)(),
 				max
 			);
 			return static_cast<FloatType>(dist(engine));
