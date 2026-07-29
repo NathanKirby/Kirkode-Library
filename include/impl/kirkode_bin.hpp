@@ -53,7 +53,7 @@ namespace kir {
 			static_assert(sizeof(IntType) < 0xFF, "kir::bin::pack_int_at only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) return false;
 			if constexpr (std::is_signed<IntType>::value) {
-				using UIntType = std::make_unsigned_t<IntType>;
+				using UIntType = std::make_unsigned<IntType>::type;
 				const UIntType unsignedValue = static_cast<UIntType>(value);
 				for (uint8_t i = 0; i < sizeof(IntType); ++i) {
 					buffer[offset + i] = static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF);
@@ -108,7 +108,7 @@ namespace kir {
 			try {
 				buffer.reserve(buffer.size() + sizeof(IntType));
 				if constexpr (std::is_signed<IntType>::value) {
-					using UIntType = std::make_unsigned_t<IntType>;
+					using UIntType = std::make_unsigned<IntType>::type;
 					const UIntType unsignedValue = static_cast<UIntType>(value);
 					for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
 						buffer.push_back(static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF));
@@ -143,7 +143,7 @@ namespace kir {
 			if (offset + sizeof(IntType) > buffer.size()) return false;
 			out = 0;
 			if constexpr (std::is_signed<IntType>::value) {
-				using UIntType = std::make_unsigned_t<IntType>;
+				using UIntType = std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
 					out |= static_cast<IntType>(static_cast<UIntType>(buffer[offset + i]) << (8 * i));
 				}
@@ -247,7 +247,7 @@ namespace kir {
 			if (offset + sizeof(IntType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
 			IntType out = 0;
 			if constexpr (std::is_signed<IntType>::value) {
-				using UIntType = std::make_unsigned_t<IntType>;
+				using UIntType = std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
 					out |= static_cast<IntType>(static_cast<UIntType>(buffer[offset + i]) << (8 * i));
 				}
