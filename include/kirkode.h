@@ -64,5 +64,5 @@
 *  8. Bool getters with a name not obviously the name of a getter must have their name start with "is_" (is_valid).
 *  9. Use ::type instead of _t for template functions and type traits (ex: std::remove_reference::type instead of std::remove_reference_t).
 * 10. Always initialize out variables. 
-* 11. Initialize variables with type constructor (ex: IntType i = IntType{} instead of IntType i = 0).
+* 11. Initialize template variables with type constructor (ex: IntType i = IntType{} instead of IntType i = 0).
 */
