@@ -6,6 +6,8 @@
 #include <vector>
 #include <mutex>
 #include <string>
+#include <type_traits> // std::is_integral, std::is_signed
+#include <limits> // std::numeric_limits
 
 namespace kir {
 	/**
@@ -148,5 +150,47 @@ namespace kir {
 		* \return true if successful, false if otherwise.
 		*/
 		static bool base64url_decode(std::string& string) noexcept;
+	public:
+		/**
+		 * \brief Checks to see if a string contains only digits.
+		 * 
+		 * \param string: The string to check.
+		 * \param allowLeadingSign: Optional parameter that tells if a leading '-' should be allowed in the string.
+		 * 
+		 * \return true if all chars are digits, false if otherwise.
+		 */
+		static bool is_digits_only(const std::string& string, bool allowLeadingSign = false) noexcept;
+	public:
+		/**
+		 * \brief Converts a string to an integral value.
+		 * 
+		 * \param string: The string to convert.
+		 * \param out: Output integral variable for converted value.
+		 * 
+		 * \return true if successfully converted string to integral value, false if otherwise.
+		 */
+		template <typename IntType>
+		static bool to_int(const std::string& string, IntType& out) noexcept {
+			static_assert(std::is_integral<IntType>::value, "kir::str::to_int only supports integral types!");
+			out = IntType{};
+			constexpr bool isSigned = std::is_signed<IntType>::value;
+			if (!is_digits_only(string, isSigned)) return false;
+			if constexpr (isSigned) {
+				int64_t i = 0;
+				try { i = std::stoll(string); }
+				catch (...) { return false; }
+				if (i > (std::numeric_limits<IntType>::max)()) return false;
+				if (i < (std::numeric_limits<IntType>::min)()) return false;
+				out = static_cast<IntType>(i);
+			}
+			else {
+				uint64_t i = 0;
+				try { i = std::stoull(string); }
+				catch (...) { return false; }
+				if (i > (std::numeric_limits<IntType>::max)()) return false;
+				out = static_cast<IntType>(i);
+			}
+			return true;
+		}
 	};
 }

@@ -149,6 +149,24 @@ namespace kir {
 		string.swap(cleaned);
 		return true;
 	}
+	 bool str::is_digits_only(const std::string& string, bool allowLeadingSign) noexcept {
+		if (string.empty()) return false;
+		if (!allowLeadingSign) {
+			for (const char c : string) {
+				if (!std::isdigit(c)) return false;
+			}
+		}
+		else {
+			const size_t len = string.size();
+			const bool isSigned = string[0] == '-';
+			if (isSigned && len <= 1) return false;
+			size_t i = isSigned ? 1 : 0;
+			for (; i < len; ++i) {
+				if (!std::isdigit(string[i])) return false;
+			}
+		}
+		return true;
+	 }
 }
 
 namespace kir {
