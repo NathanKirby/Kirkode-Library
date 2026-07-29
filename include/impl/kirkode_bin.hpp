@@ -141,7 +141,7 @@ namespace kir {
 			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at only supports integral types!");
 			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) return false;
-			out = 0;
+			out = IntType{};
 			if constexpr (std::is_signed<IntType>::value) {
 				using UIntType = std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
@@ -192,10 +192,10 @@ namespace kir {
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
 		static IntType unpack_int_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
-			IntType out = 0;
+			IntType out = IntType{};
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
-				return 0;
+				return IntType{};
 			}
 			if (outSuccess) *outSuccess = true;
 			return out;
@@ -216,10 +216,10 @@ namespace kir {
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
 		static IntType unpack_int_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
-			IntType out = 0;
+			IntType out = IntType{};
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
-				return 0;
+				return IntType{};
 			}
 			offset += sizeof(IntType);
 			if (outSuccess) *outSuccess = true;
@@ -245,7 +245,7 @@ namespace kir {
 			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at_e only supports integral types!");
 			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at_e only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
-			IntType out = 0;
+			IntType out = IntType{};
 			if constexpr (std::is_signed<IntType>::value) {
 				using UIntType = std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
@@ -404,10 +404,10 @@ namespace kir {
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
 		static FloatType unpack_float_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
-			FloatType out = 0.0f;
+			FloatType out = FloatType{};
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
-				return 0.0f;
+				return FloatType{};
 			}
 			if (outSuccess) *outSuccess = true;
 			return out;
@@ -428,10 +428,10 @@ namespace kir {
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
 		static FloatType unpack_float_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
-			FloatType out = 0.0f;
+			FloatType out = FloatType{};
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
-				return 0.0f;
+				return FloatType{};
 			}
 			offset += sizeof(FloatType);
 			if (outSuccess) *outSuccess = true;
@@ -456,7 +456,7 @@ namespace kir {
 		static FloatType unpack_float_at_e(const kir::bytes& buffer, const size_t offset) {
 			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at_e only supports floating point types!");
 			if (offset + sizeof(FloatType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
-			FloatType out = 0.0f;
+			FloatType out = FloatType{};
 			std::memcpy(&out, buffer.data() + offset, sizeof(FloatType));
 			return out;
 		}
@@ -576,7 +576,7 @@ namespace kir {
 			static_assert(std::is_integral<SizeType>::value, "kir::bin::unpack_str_at only supports integral types!");
 			static_assert(!std::is_signed<SizeType>::value, "kir::bin::unpack_str_at only supports unsigned types!");
 			if (offset + sizeof(SizeType) > buffer.size()) return false;
-			SizeType len = 0;
+			SizeType len = SizeType{};
 			std::memcpy(&len, buffer.data() + offset, sizeof(SizeType));
 			if (offset + sizeof(SizeType) + len > buffer.size()) return false;
 			if (out.size() != len) out.resize(len);
