@@ -62,4 +62,5 @@
 * 6. All functions must be noexcept unless specifically labeled otherwise in the name.
 * 7. Function parameters that are used only to output information from a function and do not provide input must have their name start with "out" (outResult).
 * 8. Bool getters with a name not obviously the name of a getter must have their name start with "is_" (is_valid).
+* 9. Use ::type instead of _t for template functions and type traits (ex: std::remove_reference::type instead of std::remove_reference_t).
 */
