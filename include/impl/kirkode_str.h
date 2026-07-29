@@ -164,6 +164,8 @@ namespace kir {
 		/**
 		 * \brief Converts a string to an integral value.
 		 * 
+		 * \tparam IntType: Integral type to convert to.
+		 * 
 		 * \param string: The string to convert.
 		 * \param out: Output integral variable for converted value.
 		 * 
