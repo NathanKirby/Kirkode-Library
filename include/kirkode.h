@@ -54,13 +54,15 @@
 // =========================================================================================
 
 /**
-* 1. Use Snake Case (my_variable_name) for classes, structs, enums, functions, and variables.
-* 2. Use capitalized Snake Case (MY_VARIABLE_NAME) for enum values.
-* 3. Use enum class instead of enum.
-* 4. Functions with no purpose beyond their return values (ex: getters) must be labeled [[nodiscard]].
-* 5. Use Camel Case (myVariableName) for function parameters.
-* 6. All functions must be noexcept unless specifically labeled otherwise in the name.
-* 7. Function parameters that are used only to output information from a function and do not provide input must have their name start with "out" (outResult).
-* 8. Bool getters with a name not obviously the name of a getter must have their name start with "is_" (is_valid).
-* 9. Use ::type instead of _t for template functions and type traits (ex: std::remove_reference::type instead of std::remove_reference_t).
+*  1. Use Snake Case (my_variable_name) for classes, structs, enums, functions, and variables.
+*  2. Use capitalized Snake Case (MY_VARIABLE_NAME) for enum values.
+*  3. Use enum class instead of enum.
+*  4. Functions with no purpose beyond their return values (ex: getters) must be labeled [[nodiscard]].
+*  5. Use Camel Case (myVariableName) for function parameters.
+*  6. All functions must be noexcept unless specifically labeled otherwise in the name.
+*  7. Function parameters that are used only to output information from a function and do not provide input must have their name start with "out" (outResult).
+*  8. Bool getters with a name not obviously the name of a getter must have their name start with "is_" (is_valid).
+*  9. Use ::type instead of _t for template functions and type traits (ex: std::remove_reference::type instead of std::remove_reference_t).
+* 10. Always initialize out variables. 
+* 11. Initialize variables with type constructor (ex: IntType i = IntType{} instead of IntType i = 0).
 */
