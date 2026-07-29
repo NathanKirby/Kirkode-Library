@@ -3,8 +3,8 @@
 // =========================================================================================
 // KIRKODE LIBRARY
 // =========================================================================================
-// Version: 2.6
-// Updated: July 22rd, 2026
+// Version: 2.6.1
+// Updated: July 29rd, 2026
 
 // #include <kirkode_types.h> -> Lightweight header to include in header files.
 // #include <kirkode.h> -------> Full include header for source files.
