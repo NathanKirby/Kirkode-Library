@@ -174,6 +174,7 @@ namespace kir {
 				return false;
 			}
 			offset += sizeof(IntType);
+			return true;
 		}
 
 		/**
@@ -213,6 +214,7 @@ namespace kir {
 		 * \return Decoded integer value, or 0 on failure.
 		 */
 		template <typename IntType>
+		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
 		static IntType unpack_int_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
 			IntType out = 0;
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
@@ -272,6 +274,7 @@ namespace kir {
 		 * \throws std::invalid_argument If the buffer is too small.
 		 */
 		template <typename IntType>
+		[[nodiscard("kir::bin::unpack_int_at_e() is pointless without use of its return value.")]]
 		static IntType unpack_int_at_e(size_t& offset, const kir::bytes& buffer) {
 			const IntType out = unpack_int_at_e<IntType>(buffer, offset);
 			offset += sizeof(IntType);
@@ -423,6 +426,7 @@ namespace kir {
 		 * \return Decoded value, or 0.0f on failure.
 		 */
 		template <typename FloatType = float>
+		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
 		static FloatType unpack_float_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
 			FloatType out = 0.0f;
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
@@ -471,6 +475,7 @@ namespace kir {
 		 * \throws std::invalid_argument: Buffer does not contain enough data.
 		 */
 		template <typename FloatType = float>
+		[[nodiscard("kir::bin::unpack_float_at_e() is pointless without use of its return value.")]]
 		static FloatType unpack_float_at_e(size_t& offset, const kir::bytes& buffer) {
 			const FloatType out = unpack_float_at_e<FloatType>(buffer, offset);
 			offset += sizeof(FloatType);
