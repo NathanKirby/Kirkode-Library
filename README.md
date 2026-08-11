@@ -1,8 +1,8 @@
-# KirKode Library v2.6
+# KirKode Library v2.7
 This is a static library built and maintained by Nathan Kirby for various projects under development by **KirKode Development**.
 
 ## Requirements
-- C++17 or newer
+- C++14 or newer
 - x64 architecture
 - Cross-platform (Windows, Linux, macOS)
 
@@ -14,6 +14,7 @@ This is a static library built and maintained by Nathan Kirby for various projec
 - String filtering
 - File management
 - Base64/Base64url encoding
+- Data serialization
 
 ## Use Cases
 - UDP/TCP network packet serialization

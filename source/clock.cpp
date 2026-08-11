@@ -2,80 +2,90 @@
 
 #include <chrono>
 
+static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 7, "Library version mismatch between source and kirkode.h");
+
 namespace kir {
-	kir::time clock::get_epoch() noexcept {
-		return static_cast<kir::time>(
-			std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::system_clock::now().time_since_epoch()
-			).count()
-		);
+	namespace clock {
+		static thread_local kir::time epoch = 0;
 	}
-	kir::time clock::time_since(const kir::time time, const kir::time* now) noexcept {
-		const kir::time n = now ? *now : get_epoch();
-		if (time > n) return 0;
-		if (time == n) return 1;
-		return n - time;
-	}
-	bool clock::stopwatch_start() noexcept {
-		if (epoch != 0) return false;
-		epoch = get_epoch();
-		return true;
-	}
-	bool clock::stopwatch_stop(kir::time& outTime) noexcept {
-		if (epoch == 0) return false;
-		const kir::time now = get_epoch();
-		if (now < epoch) return false;
-		outTime = now - epoch;
-		epoch = 0;
-		return true;
-	}
-	bool clock::stopwatch_running() noexcept {
-		return epoch != 0;
+}
+
+namespace kir {
+	namespace clock {
+		kir::time get_epoch() noexcept {
+			return static_cast<kir::time>(
+				std::chrono::duration_cast<std::chrono::milliseconds>(
+					std::chrono::system_clock::now().time_since_epoch()
+				).count()
+				);
+		}
+		kir::time time_since(const kir::time time, const kir::time* now) noexcept {
+			const kir::time n = now ? *now : get_epoch();
+			if (time > n) return 0;
+			if (time == n) return 1;
+			return n - time;
+		}
+		bool stopwatch_start() noexcept {
+			if (epoch != 0) return false;
+			epoch = get_epoch();
+			return true;
+		}
+		bool stopwatch_stop(kir::time& outTime) noexcept {
+			if (epoch == 0) return false;
+			const kir::time now = get_epoch();
+			if (now < epoch) return false;
+			outTime = now - epoch;
+			epoch = 0;
+			return true;
+		}
+		bool stopwatch_running() noexcept {
+			return epoch != 0;
+		}
 	}
 }
 
 namespace kir {
 	stopwatch::stopwatch() noexcept : _running(true), _start(clock::get_epoch()) {}
 	kir::time stopwatch::stop() noexcept {
-		lock.lock();
+		_lock.lock();
 		if (!_running) {
-			lock.unlock();
+			_lock.unlock();
 			return 0;
 		}
 		const kir::time elapsed = clock::get_epoch() - _start;
 		_start = 0;
 		_running = false;
-		lock.unlock();
+		_lock.unlock();
 		return elapsed;
 	}
 	kir::time stopwatch::check() const noexcept {
-		lock.lock();
+		_lock.lock();
 		if (!_running) {
-			lock.unlock();
+			_lock.unlock();
 			return 0;
 		}
 		const kir::time elapsed = clock::get_epoch() - _start;
-		lock.unlock();
+		_lock.unlock();
 		return elapsed;
 	}
 	kir::time stopwatch::restart() noexcept {
 		const kir::time now = clock::get_epoch();
-		lock.lock();
+		_lock.lock();
 		if (_running) {
 			const kir::time elapsed = now - _start;
 			_start = now;
-			lock.unlock();
+			_lock.unlock();
 			return elapsed;
 		}
 		_start = now;
 		_running = true;
-		lock.unlock();
+		_lock.unlock();
 		return 0;
 	}
 	bool stopwatch::running() const noexcept {
-		lock.lock();
+		_lock.lock();
 		const bool runningCopy = _running;
-		lock.unlock();
+		_lock.unlock();
 		return runningCopy;
 	}
 }

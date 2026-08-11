@@ -1,12 +1,13 @@
 #pragma once
-
+#ifndef KIR_EXCLUDE_LOG
 #include <string> // std::string.
 #include <exception> // std::exception.
 #include <iostream>
+#include <cstdint> // uint8_t
 
 #ifdef KIR_LOG_THREADED
 #include <mutex>
-#endif
+#endif // KIR_LOG_THREADED
 
 namespace kir {
 	/**
@@ -62,7 +63,8 @@ namespace kir {
 	class log {
 #ifdef KIR_LOG_THREADED
 	private:
-		inline static std::mutex logMutex;
+		// Mutex to allow safe use in multi-threaded environments.
+		inline static std::mutex _lock;
 #endif
 	public:
 		/**
@@ -72,7 +74,7 @@ namespace kir {
 		*/
 		static void msg(const std::string& message) noexcept {
 #ifdef KIR_LOG_THREADED
-			std::lock_guard<std::mutex> lock(logMutex);
+			std::lock_guard<std::mutex> lock(_lock);
 #endif
 			std::cout << message << std::endl;
 		}
@@ -85,7 +87,7 @@ namespace kir {
 		*/
 		static void msg(const std::string& message, bool newLine) noexcept {
 #ifdef KIR_LOG_THREADED
-			std::lock_guard<std::mutex> lock(logMutex);
+			std::lock_guard<std::mutex> lock(_lock);
 #endif
 			std::cout << message;
 			if (newLine) std::cout << std::endl;
@@ -109,20 +111,27 @@ namespace kir {
 			bool newLine = true
 		) noexcept {
 #ifdef KIR_LOG_THREADED
-			std::lock_guard<std::mutex> lock(logMutex);
+			std::lock_guard<std::mutex> lock(_lock);
 #endif
 			bool textChanged = false;
+			std::string ansi = "\033[";
+			if (style != log_sty::NONE) {
+				ansi += std::to_string(static_cast<unsigned>(style));
+				textChanged = true;
+			}
 			if (foreground != log_clr::NONE) {
-				std::cout << "\033[" << static_cast<uint8_t>(foreground) << 'm';
+				if (textChanged) ansi += ';';
+				ansi += std::to_string(static_cast<unsigned>(foreground));
 				textChanged = true;
 			}
 			if (background != log_bkg::NONE) {
-				std::cout << "\033[" << static_cast<uint8_t>(background) << 'm';
+				if (textChanged) ansi += ';';
+				ansi += std::to_string(static_cast<unsigned>(background));
 				textChanged = true;
 			}
-			if (style != log_sty::NONE) {
-				std::cout << "\033[" << static_cast<uint8_t>(style) << 'm';
-				textChanged = true;
+			if (textChanged) {
+				ansi += 'm';
+				std::cout << ansi;
 			}
 			std::cout << message;
 			if (textChanged) std::cout << "\033[0m";
@@ -137,7 +146,7 @@ namespace kir {
 		*/
 		static void err(const std::string& message, const std::exception* e = nullptr) noexcept {
 #ifdef KIR_LOG_THREADED
-			std::lock_guard<std::mutex> lock(logMutex);
+			std::lock_guard<std::mutex> lock(_lock);
 #endif
 			std::cout << "\033[97m\033[101m" << "[ERROR] " << message;
 			if (e) std::cout << e->what();
@@ -145,3 +154,4 @@ namespace kir {
 		}
 	};
 }
+#endif // KIR_EXCLUDE_LOG

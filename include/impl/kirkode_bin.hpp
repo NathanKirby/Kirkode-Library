@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef KIR_EXCLUDE_BIN
 #include "kirkode_types.h"
 
 #include <string>
@@ -32,8 +32,7 @@ namespace kir {
 	 *
 	 * This class is entirely static and does not require instantiation.
 	 */
-	class bin {
-	public:
+	namespace bin {
 		/**
 		 * \brief Writes an integer into a buffer at a specific offset.
 		 * The value is encoded in little-endian format.
@@ -49,10 +48,14 @@ namespace kir {
 		 */
 		template <typename IntType>
 		static bool pack_int_at(kir::bytes& buffer, const size_t offset, const IntType value) noexcept {
-			static_assert(std::is_integral<IntType>::value, "kir::bin::pack_int_at only supports integral types!");
-			static_assert(sizeof(IntType) < 0xFF, "kir::bin::pack_int_at only supports types smaller than 0xFF!");
+			static_assert(std::is_integral<IntType>::value, "kir::bin::pack_int_at() only supports integral types!");
+			static_assert(sizeof(IntType) < 0xFF, "kir::bin::pack_int_at() only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) return false;
+#if KIR_CPP_STD < 201703L
+			if (std::is_signed<IntType>::value) {
+#else
 			if constexpr (std::is_signed<IntType>::value) {
+#endif
 				using UIntType = typename std::make_unsigned<IntType>::type;
 				const UIntType unsignedValue = static_cast<UIntType>(value);
 				for (uint8_t i = 0; i < sizeof(IntType); ++i) {
@@ -81,7 +84,7 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename IntType>
-		static bool pack_int_at(size_t& offset, kir::bytes& buffer, const IntType value) noexcept {
+		static bool pack_int_at(size_t & offset, kir::bytes & buffer, const IntType value) noexcept {
 			if (!pack_int_at<IntType>(buffer, offset, value)) {
 				return false;
 			}
@@ -102,28 +105,32 @@ namespace kir {
 		 * \return true if the value was successfully appended, false on allocation failure.
 		 */
 		template <typename IntType>
-		static bool pack_int(kir::bytes& buffer, const IntType value) noexcept {
-			static_assert(std::is_integral<IntType>::value, "kir::bin::pack_int only supports integral types!");
-			static_assert(sizeof(IntType) < 0xFF, "kir::bin::pack_int only supports types smaller than 0xFF!");
+		static bool pack_int(kir::bytes & buffer, const IntType value) noexcept {
+			static_assert(std::is_integral<IntType>::value, "kir::bin::pack_int() only supports integral types!");
+			static_assert(sizeof(IntType) < 0xFF, "kir::bin::pack_int() only supports types smaller than 0xFF!");
 			try {
 				buffer.reserve(buffer.size() + sizeof(IntType));
-				if constexpr (std::is_signed<IntType>::value) {
-					using UIntType = typename std::make_unsigned<IntType>::type;
-					const UIntType unsignedValue = static_cast<UIntType>(value);
-					for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
-						buffer.push_back(static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF));
-					}
-				}
-				else {
-					for (uint8_t i = 0; i < sizeof(IntType); ++i) {
-						buffer.push_back(static_cast<kir::byte>((value >> (i * 8)) & 0xFF));
-					}
-				}
 			}
 			catch (...) { return false; }
+#if KIR_CPP_STD < 201703L
+			if (std::is_signed<IntType>::value) {
+#else
+			if constexpr (std::is_signed<IntType>::value) {
+#endif
+				using UIntType = typename std::make_unsigned<IntType>::type;
+				const UIntType unsignedValue = static_cast<UIntType>(value);
+				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
+					buffer.push_back(static_cast<kir::byte>((unsignedValue >> (i * 8)) & 0xFF));
+				}
+			}
+			else {
+				for (uint8_t i = 0; i < sizeof(IntType); ++i) {
+					buffer.push_back(static_cast<kir::byte>((value >> (i * 8)) & 0xFF));
+				}
+			}
 			return true;
 		}
-	public:
+
 		/**
 		 * \brief Reads an integer from a buffer at a specific offset.
 		 * The value is decoded using little-endian format.
@@ -137,12 +144,16 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename IntType>
-		static bool unpack_int_at(const kir::bytes& buffer, const size_t offset, IntType& out) noexcept {
-			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at only supports integral types!");
-			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at only supports types smaller than 0xFF!");
+		static bool unpack_int_at(const kir::bytes & buffer, const size_t offset, IntType & out) noexcept {
+			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at() only supports integral types!");
+			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at() only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) return false;
 			out = IntType{};
+#if KIR_CPP_STD < 201703L
+			if (std::is_signed<IntType>::value) {
+#else
 			if constexpr (std::is_signed<IntType>::value) {
+#endif
 				using UIntType = typename std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
 					out |= static_cast<IntType>(static_cast<UIntType>(buffer[offset + i]) << (8 * i));
@@ -169,7 +180,7 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename IntType>
-		static bool unpack_int_at(size_t& offset, const kir::bytes& buffer, IntType& out) noexcept {
+		static bool unpack_int_at(size_t & offset, const kir::bytes & buffer, IntType & out) noexcept {
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
 				return false;
 			}
@@ -191,7 +202,7 @@ namespace kir {
 		 */
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
-		static IntType unpack_int_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
+		static IntType unpack_int_at_r(const kir::bytes & buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
 			IntType out = IntType{};
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
@@ -215,7 +226,7 @@ namespace kir {
 		 */
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_r() is pointless without use of its return value.")]]
-		static IntType unpack_int_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
+		static IntType unpack_int_at_r(size_t & offset, const kir::bytes & buffer, bool* outSuccess = nullptr) noexcept {
 			IntType out = IntType{};
 			if (!unpack_int_at<IntType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
@@ -241,12 +252,16 @@ namespace kir {
 		 */
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_e() is pointless without use of its return value.")]]
-		static IntType unpack_int_at_e(const kir::bytes& buffer, const size_t offset) {
-			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at_e only supports integral types!");
-			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at_e only supports types smaller than 0xFF!");
+		static IntType unpack_int_at_e(const kir::bytes & buffer, const size_t offset) {
+			static_assert(std::is_integral<IntType>::value, "kir::bin::unpack_int_at_e() only supports integral types!");
+			static_assert(sizeof(IntType) < 0xFF, "kir::bin::unpack_int_at_e() only supports types smaller than 0xFF!");
 			if (offset + sizeof(IntType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
 			IntType out = IntType{};
+#if KIR_CPP_STD < 201703L
+			if (std::is_signed<IntType>::value) {
+#else
 			if constexpr (std::is_signed<IntType>::value) {
+#endif
 				using UIntType = typename std::make_unsigned<IntType>::type;
 				for (uint8_t i = 0; i < sizeof(UIntType); ++i) {
 					out |= static_cast<IntType>(static_cast<UIntType>(buffer[offset + i]) << (8 * i));
@@ -258,7 +273,7 @@ namespace kir {
 				}
 			}
 			return out;
-		}
+			}
 
 		/**
 		 * \brief Reads an integer, advances offset, or throws on failure.
@@ -275,12 +290,12 @@ namespace kir {
 		 */
 		template <typename IntType>
 		[[nodiscard("kir::bin::unpack_int_at_e() is pointless without use of its return value.")]]
-		static IntType unpack_int_at_e(size_t& offset, const kir::bytes& buffer) {
+		static IntType unpack_int_at_e(size_t & offset, const kir::bytes & buffer) {
 			const IntType out = unpack_int_at_e<IntType>(buffer, offset);
 			offset += sizeof(IntType);
 			return out;
 		}
-	public:
+
 		/**
 		 * \brief Writes a floating-point value into a buffer at a specific offset.
 		 * The raw binary representation of the value is copied into the buffer.
@@ -295,8 +310,8 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename FloatType = float>
-		static bool pack_float_at(kir::bytes& buffer, const size_t offset, const FloatType value) noexcept {
-			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::pack_float_at only supports floating point types!");
+		static bool pack_float_at(kir::bytes & buffer, const size_t offset, const FloatType value) noexcept {
+			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::pack_float_at() only supports floating point types!");
 			if (offset + sizeof(FloatType) > buffer.size()) return false;
 			std::memcpy(&buffer[offset], &value, sizeof(FloatType));
 			return true;
@@ -316,11 +331,11 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename FloatType = float>
-		static bool pack_float_at(size_t& offset, kir::bytes& buffer, const FloatType value) noexcept {
+		static bool pack_float_at(size_t & offset, kir::bytes & buffer, const FloatType value) noexcept {
 			if (!pack_float_at<FloatType>(buffer, offset, value)) {
 				return false;
 			}
-			buffer += sizeof(FloatType);
+			offset += sizeof(FloatType);
 			return true;
 		}
 
@@ -337,17 +352,17 @@ namespace kir {
 		 * \return true if successful, false on allocation failure.
 		 */
 		template <typename FloatType = float>
-		static bool pack_float(kir::bytes& buffer, const FloatType value) noexcept {
-			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::pack_float only supports floating point types!");
+		static bool pack_float(kir::bytes & buffer, const FloatType value) noexcept {
+			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::pack_float() only supports floating point types!");
 			const size_t oldSize = buffer.size();
 			try {
 				buffer.resize(oldSize + sizeof(FloatType));
-				std::memcpy(&buffer[oldSize], &value, sizeof(FloatType));
 			}
 			catch (...) { return false; }
+			std::memcpy(&buffer[oldSize], &value, sizeof(FloatType));
 			return true;
 		}
-	public:
+
 		/**
 		 * \brief Reads a floating-point value from a buffer at a specific offset.
 		 * Reads the raw binary representation from the buffer into the output value.
@@ -361,8 +376,8 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename FloatType = float>
-		static bool unpack_float_at(const kir::bytes& buffer, const size_t offset, FloatType& out) noexcept {
-			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at only supports floating point types!");
+		static bool unpack_float_at(const kir::bytes & buffer, const size_t offset, FloatType & out) noexcept {
+			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at() only supports floating point types!");
 			if (offset + sizeof(FloatType) > buffer.size()) return false;
 			std::memcpy(&out, buffer.data() + offset, sizeof(FloatType));
 			return true;
@@ -381,7 +396,7 @@ namespace kir {
 		 * \return true if successful, false if the buffer is too small.
 		 */
 		template <typename FloatType = float>
-		static bool unpack_float_at(size_t& offset, const kir::bytes& buffer, FloatType& out) noexcept {
+		static bool unpack_float_at(size_t & offset, const kir::bytes & buffer, FloatType & out) noexcept {
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
 				return false;
 			}
@@ -403,7 +418,7 @@ namespace kir {
 		 */
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
-		static FloatType unpack_float_at_r(const kir::bytes& buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
+		static FloatType unpack_float_at_r(const kir::bytes & buffer, const size_t offset, bool* outSuccess = nullptr) noexcept {
 			FloatType out = FloatType{};
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
@@ -427,7 +442,7 @@ namespace kir {
 		 */
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_r() is pointless without use of its return value.")]]
-		static FloatType unpack_float_at_r(size_t& offset, const kir::bytes& buffer, bool* outSuccess = nullptr) noexcept {
+		static FloatType unpack_float_at_r(size_t & offset, const kir::bytes & buffer, bool* outSuccess = nullptr) noexcept {
 			FloatType out = FloatType{};
 			if (!unpack_float_at<FloatType>(buffer, offset, out)) {
 				if (outSuccess) *outSuccess = false;
@@ -453,8 +468,8 @@ namespace kir {
 		 */
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_e() is pointless without use of its return value.")]]
-		static FloatType unpack_float_at_e(const kir::bytes& buffer, const size_t offset) {
-			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at_e only supports floating point types!");
+		static FloatType unpack_float_at_e(const kir::bytes & buffer, const size_t offset) {
+			static_assert(std::is_floating_point<FloatType>::value, "kir::bin::unpack_float_at_e() only supports floating point types!");
 			if (offset + sizeof(FloatType) > buffer.size()) throw std::invalid_argument("Buffer too small!");
 			FloatType out = FloatType{};
 			std::memcpy(&out, buffer.data() + offset, sizeof(FloatType));
@@ -476,12 +491,12 @@ namespace kir {
 		 */
 		template <typename FloatType = float>
 		[[nodiscard("kir::bin::unpack_float_at_e() is pointless without use of its return value.")]]
-		static FloatType unpack_float_at_e(size_t& offset, const kir::bytes& buffer) {
+		static FloatType unpack_float_at_e(size_t & offset, const kir::bytes & buffer) {
 			const FloatType out = unpack_float_at_e<FloatType>(buffer, offset);
 			offset += sizeof(FloatType);
 			return out;
 		}
-	public:
+
 		/**
 		 * \brief Writes a string into a buffer at a specific offset.
 		 * The string is stored as a length value followed by the raw string data.
@@ -497,9 +512,9 @@ namespace kir {
 		 * or the string exceeds the maximum representable length.
 		 */
 		template <typename SizeType = uint16_t>
-		static bool pack_str_at(kir::bytes& buffer, const size_t offset, const std::string& str) noexcept {
-			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str_at only supports unsigned integral types!");
-			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str_at only supports unsigned integral types!");
+		static bool pack_str_at(kir::bytes & buffer, const size_t offset, const std::string & str) noexcept {
+			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str_at() only supports unsigned integral types!");
+			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str_at() only supports unsigned integral types!");
 			if ((std::numeric_limits<SizeType>::max)() < str.size()) return false;
 			const SizeType len = static_cast<SizeType>(str.size());
 			if (offset + sizeof(SizeType) + len > buffer.size()) return false;
@@ -523,11 +538,11 @@ namespace kir {
 		 * or the string exceeds the maximum representable length.
 		 */
 		template <typename SizeType = uint16_t>
-		static bool pack_str_at(size_t& offset, kir::bytes& buffer, const std::string& str) noexcept {
+		static bool pack_str_at(size_t & offset, kir::bytes & buffer, const std::string & str) noexcept {
 			if (!pack_str_at<SizeType>(buffer, offset, str)) {
 				return false;
 			}
-			offset += sizeof(SizeType);
+			offset += sizeof(SizeType) + str.size();
 			return true;
 		}
 
@@ -545,9 +560,9 @@ namespace kir {
 		 * or the string exceeds the maximum representable length.
 		 */
 		template <typename SizeType = uint16_t>
-		static bool pack_str(kir::bytes& buffer, const std::string& str) noexcept {
-			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str only supports unsigned integral types!");
-			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str only supports unsigned integral types!");
+		static bool pack_str(kir::bytes & buffer, const std::string & str) noexcept {
+			static_assert(std::is_integral<SizeType>::value, "kir::bin::pack_str() only supports unsigned integral types!");
+			static_assert(!std::is_signed<SizeType>::value, "kir::bin::pack_str() only supports unsigned integral types!");
 			if ((std::numeric_limits<SizeType>::max)() < str.size()) return false;
 			const SizeType len = static_cast<SizeType>(str.size());
 			const size_t bufferLen = buffer.size();
@@ -557,7 +572,7 @@ namespace kir {
 			std::memcpy(buffer.data() + bufferLen + sizeof(SizeType), str.data(), len);
 			return true;
 		}
-	public:
+
 		/**
 		 * \brief Reads a string from a buffer at a specific offset.
 		 * Expects the string to be stored as a length value followed by raw string data.
@@ -572,9 +587,9 @@ namespace kir {
 		 * enough data or string allocation fails.
 		 */
 		template <typename SizeType = uint16_t>
-		static bool unpack_str_at(const kir::bytes& buffer, const size_t offset, std::string& out) noexcept {
-			static_assert(std::is_integral<SizeType>::value, "kir::bin::unpack_str_at only supports integral types!");
-			static_assert(!std::is_signed<SizeType>::value, "kir::bin::unpack_str_at only supports unsigned types!");
+		static bool unpack_str_at(const kir::bytes & buffer, const size_t offset, std::string & out) noexcept {
+			static_assert(std::is_integral<SizeType>::value, "kir::bin::unpack_str_at() only supports integral types!");
+			static_assert(!std::is_signed<SizeType>::value, "kir::bin::unpack_str_at() only supports unsigned types!");
 			if (offset + sizeof(SizeType) > buffer.size()) return false;
 			SizeType len = SizeType{};
 			std::memcpy(&len, buffer.data() + offset, sizeof(SizeType));
@@ -599,12 +614,74 @@ namespace kir {
 		 * enough data or string allocation fails.
 		 */
 		template <typename SizeType = uint16_t>
-		static bool unpack_str_at(size_t& offset, const kir::bytes& buffer, std::string& out) noexcept {
+		static bool unpack_str_at(size_t & offset, const kir::bytes & buffer, std::string & out) noexcept {
 			if (!unpack_str_at<SizeType>(buffer, offset, out)) {
 				return false;
 			}
 			offset += sizeof(SizeType) + out.size();
 			return true;
 		}
-	};
+
+		/**
+		 * \brief Writes a trivially copyable class/struct to a buffer and advances the offset.
+		 * Acts like a streaming writer.
+		 *
+		 * Copies the raw memory representation of the object into the destination buffer.
+		 * The type must have a standard layout and be safe for binary copying.
+		 *
+		 * \tparam ClassType: Class/struct type to write.
+		 *
+		 * \param offset: Position in buffer (will be advanced on success).
+		 * \param buffer: Destination byte buffer.
+		 * \param value: Object to encode into the buffer.
+		 *
+		 * \return true if successful, false if the buffer does not contain
+		 * enough space for the object.
+		 */
+		template <typename ClassType>
+		static bool pack_class_at(size_t & offset, kir::bytes & buffer, const ClassType & value) noexcept {
+			static_assert(std::is_class<ClassType>::value, "kir::bin::pack_class_at() only accepts class or struct types!");
+			static_assert(std::is_trivially_copyable<ClassType>::value, "kir::bin::pack_class_at() only accepts types that are trivially copyable!");
+			static_assert(std::is_standard_layout<ClassType>::value, "kir::bin::pack_class_at() only accepts types with a standard layout!");
+			static_assert(sizeof(ClassType) > 1, "kir::bin::pack_class_at() does not accept empty classes!");
+			if (offset + sizeof(ClassType) > buffer.size()) return false;
+			std::memcpy(buffer.data() + offset, &value, sizeof(ClassType));
+			offset += sizeof(ClassType);
+			return true;
+		}
+
+		/**
+		 * \brief Reads a trivially copyable class/struct from a buffer and advances the offset.
+		 * Acts like a streaming reader.
+		 *
+		 * Copies raw bytes from the buffer into the output object.
+		 * An optional size override can be used when reading data produced by
+		 * a different compiler, framework, or binary format with a different
+		 * structure size due to padding or packing differences.
+		 *
+		 * \tparam ClassType: Class/struct type to read.
+		 *
+		 * \param offset: Position in buffer (will be advanced on success).
+		 * \param buffer: Source byte buffer.
+		 * \param out: Output object for decoded data.
+		 * \param sizeOverride: Number of bytes to read instead of sizeof(ClassType)
+		 * (default: sizeof(ClassType)).
+		 *
+		 * \return true if successful, false if the buffer does not contain
+		 * enough data or the requested read size exceeds the object size.
+		 */
+		template <typename ClassType>
+		static bool unpack_class_at(size_t & offset, const kir::bytes & buffer, ClassType & out, const size_t sizeOverride = 0) noexcept {
+			static_assert(std::is_class<ClassType>::value, "kir::bin::unpack_class_at() only accepts class or struct types!");
+			static_assert(std::is_trivially_copyable<ClassType>::value, "kir::bin::unpack_class_at() only accepts types that are trivially copyable!");
+			static_assert(std::is_standard_layout<ClassType>::value, "kir::bin::unpack_class_at() only accepts types with a standard layout!");
+			static_assert(sizeof(ClassType) > 1, "kir::bin::unpack_class_at() does not accept empty classes!");
+			const size_t typeSize = sizeOverride == 0 ? sizeof(ClassType) : sizeOverride;
+			if (offset + typeSize > buffer.size()) return false;
+			std::memcpy(&out, buffer.data() + offset, typeSize);
+			offset += typeSize;
+			return true;
+		}
+	}
 }
+#endif // KIR_EXCLUDE_BIN

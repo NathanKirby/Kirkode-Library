@@ -4,6 +4,21 @@
 #include <vector>
 #include <type_traits>
 
+#define KIR_VERSION_MAJOR 2
+#define KIR_VERSION_MINOR 7
+#define KIR_VERSION_PATCH 0
+#define KIR_VERSION_STRING "2.7"
+
+#ifdef _MSVC_LANG
+#define KIR_CPP_STD _MSVC_LANG
+#else
+#ifdef __cplusplus
+#define KIR_CPP_STD __cplusplus
+#else
+#define KIR_CPP_STD 0L
+#endif // __cplusplus
+#endif // _MSVC_LANG
+
 namespace kir {
 	/**
 	 * \brief Alias for a single raw byte.
@@ -25,7 +40,7 @@ namespace kir {
 	 * 2: Building network packets (e.g., UDP payloads).
 	 * 3: Reading/writing binary file data.
 	 */
-	typedef std::vector<uint8_t> bytes;
+	typedef std::vector<byte> bytes;
 
 	/**
 	 * \brief Millisecond-based timestamp type.
@@ -45,7 +60,7 @@ namespace kir {
 	/**
 	 * \brief Bit index enumeration for flag_poll bitfields.
 	 *
-	 * Represents a fixed set of bit positions (0–63) used to manipulate
+	 * Represents a fixed set of bit positions (0-63) used to manipulate
 	 * flags inside a PollType bitmask.
 	 *
 	 * Each value corresponds to a single bit index:
@@ -79,8 +94,8 @@ namespace kir {
 	 */
 	template <typename PollType = uint16_t>
 	class flag_poll {
-		static_assert(std::is_integral_v<PollType>, "Flag type must be integral!");
-		static_assert(!std::is_signed_v<PollType>, "Flag type must be unsigned!");
+		static_assert(std::is_integral<PollType>::value, "Flag type must be integral!");
+		static_assert(!std::is_signed<PollType>::value, "Flag type must be unsigned!");
 	private:
 		PollType poll;
 	public:
@@ -143,15 +158,15 @@ namespace kir {
 		 *
 		 * \return true if the specified flag is active, false otherwise.
 		 */
-		[[nodiscard("kir::flag_pol::flag_set() is a getter.")]]
-		bool flag_set(const flag_bit f) const noexcept { return poll & (PollType(1) << static_cast<uint8_t>(f)); }
+		[[nodiscard("kir::flag_poll::is_flag_set() is a getter.")]]
+		bool is_flag_set(const flag_bit f) const noexcept { return poll & (PollType(1) << static_cast<uint8_t>(f)); }
 
 		/**
 		 * \brief Retrieves the raw bitmask value.
 		 *
 		 * \return Current flag bitmask.
 		 */
-		[[nodiscard("kir::flag_pol::get() is a getter.")]]
+		[[nodiscard("kir::flag_poll::get() is a getter.")]]
 		PollType get() const noexcept { return poll; }
 	};
 }

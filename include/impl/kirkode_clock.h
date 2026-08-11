@@ -1,26 +1,24 @@
 #pragma once
-
+#ifndef KIR_EXCLUDE_CLOCK
 #include "kirkode_types.h"
+
+#include <mutex>
 
 namespace kir {
 	/**
 	 * \brief Provides basic time utilities and a simple global stopwatch facility.
 	 *
-	 * The clock class offers:
+	 * The clock namespace offers:
 	 * 1: Access to the current system time in milliseconds.
 	 * 2: Utility functions for computing time differences.
 	 * 3: A lightweight global stopwatch based on a single shared epoch.
 	 *
 	 * The stopwatch functionality is thread-local and not instance-based:
-	 * only one stopwatch per-thread can run at a time using this class.
+	 * only one stopwatch per-thread can run at a time using this namespace.
 	 * 
 	 * Use kir::stopwatch() for an instance-based stopwatch.
 	 */
-	class clock {
-	private:
-		// Epoch used for stopwatch functions.
-		inline static thread_local kir::time epoch = 0;
-	public:
+	namespace clock {
 		/**
 		 * \brief Returns the current system time in milliseconds since epoch.
 		 *
@@ -29,7 +27,7 @@ namespace kir {
 		 * \return Current time in milliseconds since epoch.
 		 */
 		[[nodiscard("kir::clock::get_epoch() is useless without use of its return value.")]]
-		static kir::time get_epoch() noexcept;
+		kir::time get_epoch() noexcept;
 
 		/**
 		* \brief Gets the time since a given epoch.
@@ -40,14 +38,14 @@ namespace kir {
 		* \return Time since given Epoch. 0 == Given time > Epoch, 1 == Given time == Epoch.
 		*/
 		[[nodiscard("kir::clock::time_since() is useless without use of its return value.")]]
-		static kir::time time_since(const kir::time time, const kir::time* now = nullptr) noexcept;
+		kir::time time_since(const kir::time time, const kir::time* now = nullptr) noexcept;
 
 		/**
 		* Starts a stopwatch using Epoch as milliseconds.
 		*
 		* \return True if started, false if already running.
 		*/
-		static bool stopwatch_start() noexcept;
+		bool stopwatch_start() noexcept;
 
 		/**
 		* \brief Stops the stopwatch.
@@ -55,7 +53,7 @@ namespace kir {
 		* \param outTime: Duration in milliseconds.
 		* \return True if stopped, false if stopwatch hasn't been started.
 		*/
-		static bool stopwatch_stop(kir::time& outTime) noexcept;
+		bool stopwatch_stop(kir::time& outTime) noexcept;
 
 		/**
 		* \brief Checks to see if the stopwatch has been started.
@@ -63,11 +61,9 @@ namespace kir {
 		* \return True if stopwatch has been started and is running, false if otherwise.
 		*/
 		[[nodiscard("kir::clock::stopwatch_running() is a getter.")]]
-		static bool stopwatch_running() noexcept;
+		bool stopwatch_running() noexcept;
 	};
 }
-
-#include <mutex>
 
 namespace kir {
 	/**
@@ -80,9 +76,12 @@ namespace kir {
 	 */
 	class stopwatch {
 	private:
-		mutable std::mutex lock;
+		// Mutex to allow safe use in multi-threaded environments.
+		mutable std::mutex _lock;
 	private:
+		// Tells whether the stopwatch is running or not.
 		bool _running;
+		// The time of construction.
 		kir::time _start;
 	public:
 		/**
@@ -131,3 +130,4 @@ namespace kir {
 		bool running() const noexcept;
 	};
 }
+#endif // KIR_EXCLUDE_CLOCK
