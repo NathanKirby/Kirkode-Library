@@ -1,20 +1,101 @@
 #include "impl/kirkode_str.h"
 
-#include <cctype> // std::isalpha, std::isdigit
 #include <algorithm> // std::find
 #include <mutex>
 #include <unordered_map>
 
-static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 7, "Library version mismatch between source and kirkode.h");
+static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 8, "Library version mismatch between source and kirkode.h");
 
+// Internal
 namespace kir {
 	namespace str {
 		static std::mutex lock;
 		static std::unordered_map<uint8_t, std::string> whitelistMap;
 		static std::unordered_map<uint8_t, std::string> blacklistMap;
+		static const std::string* internal_get_list(const uint8_t listId, const bool bWhitelist) noexcept {
+			const std::unordered_map<uint8_t, std::string>* map = bWhitelist 
+				? &whitelistMap 
+				: &blacklistMap;
+			lock.lock();
+			auto it = map->find(listId);
+			if (it == map->end()) {
+				lock.unlock();
+				return nullptr;
+			}
+			const std::string* p = &it->second;
+			lock.unlock();
+			return p;
+		}
 	}
 }
 
+// Char Helpers
+namespace kir {
+	namespace str {
+		bool is_digit(const char c) noexcept {
+			return static_cast<uint8_t>(c) >= 48 && static_cast<uint8_t>(c) <= 57;
+		}
+		bool is_uppercase_letter(const char c) noexcept {
+			return static_cast<uint8_t>(c) >= 65 && static_cast<uint8_t>(c) <= 90;
+		}
+		bool is_lowercase_letter(const char c) noexcept {
+			return static_cast<uint8_t>(c) >= 97 && static_cast<uint8_t>(c) <= 122;
+		}
+		bool is_letter(const char c) noexcept {
+			return is_lowercase_letter(c) || is_uppercase_letter(c);
+		}
+		char to_uppercase(const char c) noexcept {
+			const bool isUppercaseLetter = is_uppercase_letter(c);
+			const bool isLowercaseLetter = is_lowercase_letter(c);
+			if (!isUppercaseLetter && !isLowercaseLetter) return '?';
+			if (isUppercaseLetter) return c;
+			return static_cast<char>(static_cast<uint8_t>(c) - 32);
+		}
+		char to_lowercase(const char c) noexcept {
+			const bool isUppercaseLetter = is_uppercase_letter(c);
+			const bool isLowercaseLetter = is_lowercase_letter(c);
+			if (!isUppercaseLetter && !isLowercaseLetter) return '?';
+			if (isLowercaseLetter) return c;
+			return static_cast<char>(static_cast<uint8_t>(c) + 32);
+		}
+	}
+}
+
+// String Helpers
+namespace kir {
+	namespace str {
+		bool is_digits_only(const std::string& string, bool allowLeadingSign) noexcept {
+			size_t i = string.size();
+			if (i == 0) return false;
+			do {
+				if (!is_digit(string[i - 1])) {
+					return false;
+				}
+				--i;
+			} while (i > 1);
+			if (allowLeadingSign) {
+				if (!is_digit(string[0]) && string[0] != '-') {
+					return false;
+				}
+			}
+			else {
+				if (!is_digit(string[0])) {
+					return false;
+				}
+			}
+			return true;
+		}
+		bool is_letters_only(const std::string& string) noexcept {
+			if (string.empty()) return false;
+			for (const char c : string) {
+				if (!is_letter(c)) return false;
+			}
+			return true;
+		}
+	}
+}
+
+// Blacklist/Whitelist Operations
 namespace kir {
 	namespace str {
 		bool add_whitelist(std::string&& whitelist, const uint8_t listId) noexcept {
@@ -111,21 +192,21 @@ namespace kir {
 				cleaned.reserve(string.size());
 				if (preset == str_preset::NUMERIC) {
 					for (char c : string) {
-						if (std::isdigit(c)) {
+						if (is_digit(c)) {
 							cleaned.push_back(c);
 						}
 					}
 				}
 				else if (preset == str_preset::ALPHA) {
 					for (char c : string) {
-						if (std::isalpha(c)) {
+						if (is_letter(c)) {
 							cleaned.push_back(c);
 						}
 					}
 				}
 				else if (preset == str_preset::ALPHANUMERIC) {
 					for (char c : string) {
-						if (std::isalpha(c) || std::isdigit(c)) {
+						if (is_digit(c) || is_letter(c)) {
 							cleaned.push_back(c);
 						}
 					}
@@ -146,8 +227,8 @@ namespace kir {
 				}
 				else if (preset == str_preset::FILE) {
 					for (char c : string) {
-						if (std::isalpha(c) ||
-							std::isdigit(c) ||
+						if (is_digit(c) ||
+							is_letter(c) ||
 							std::find(file_preset.begin(), file_preset.end(), c) != file_preset.end()
 							) {
 							cleaned.push_back(c);
@@ -163,27 +244,10 @@ namespace kir {
 			string.swap(cleaned);
 			return true;
 		}
-		bool is_digits_only(const std::string& string, bool allowLeadingSign) noexcept {
-			if (string.empty()) return false;
-			if (!allowLeadingSign) {
-				for (const char c : string) {
-					if (!std::isdigit(c)) return false;
-				}
-			}
-			else {
-				const size_t len = string.size();
-				const bool isSigned = string[0] == '-';
-				if (isSigned && len <= 1) return false;
-				size_t i = isSigned ? 1 : 0;
-				for (; i < len; ++i) {
-					if (!std::isdigit(string[i])) return false;
-				}
-			}
-			return true;
-		}
 	}
 }
 
+// Internal Base64
 namespace kir {
 	namespace str {
 		static constexpr char base64_table[65] =
@@ -230,11 +294,6 @@ namespace kir {
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 			-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 		};
-	}
-}
-
-namespace kir {
-	namespace str {
 		static bool internal_valid_base64(const std::string& input, const size_t inputSize, const int8_t(&decodeTable)[256]) noexcept {
 			if (inputSize == 0) return false;
 			uint8_t pad = 0;
@@ -316,13 +375,14 @@ namespace kir {
 	}
 }
 
+// Base64 Operations
 namespace kir {
 	namespace str {
-		bool is_valid_base64(const std::string& input, const size_t inputSize) noexcept {
-			return internal_valid_base64(input, inputSize, base64_decode_table);
+		bool is_valid_base64(const std::string& input) noexcept {
+			return internal_valid_base64(input, input.size(), base64_decode_table);
 		}
-		bool is_valid_base64url(const std::string& input, const size_t inputSize) noexcept {
-			return internal_valid_base64(input, inputSize, base64url_decode_table);
+		bool is_valid_base64url(const std::string& input) noexcept {
+			return internal_valid_base64(input, input.size(), base64url_decode_table);
 		}
 		bool base64_encode(std::string& string) noexcept {
 			return internal_base64_encode(string, base64_table, true);

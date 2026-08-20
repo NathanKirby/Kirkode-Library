@@ -17,13 +17,13 @@
 /**//**/} \
 /**/}())
 
-/**
- * \brief Executes a function call and catches any exception.
- *
- * \param unsafe: Function call to execute.
- *
- * \return true if the function succeeds, false if an exception is thrown.
- */
+ /**
+  * \brief Executes a function call and catches any exception.
+  *
+  * \param unsafe: Function call to execute.
+  *
+  * \return true if the function succeeds, false if an exception is thrown.
+  */
 #define K_NOEXCEPT_B(unsafe) \
 /**/([&]() noexcept -> bool { \
 /**//**/try { \
@@ -34,12 +34,12 @@
 /**//**/} \
 /**/}())
 
-/**
- * \brief Executes an expression and handles any exception with a specified action.
- *
- * \param unsafe: Expression to execute.
- * \param ecase: Expression to execute if an exception is thrown.
- */
+  /**
+   * \brief Executes an expression and handles any exception with a specified action.
+   *
+   * \param unsafe: Expression to execute.
+   * \param ecase: Expression to execute if an exception is thrown.
+   */
 #define K_NOEXCEPT_H(unsafe, ecase) \
 /**/([&]() noexcept -> void { \
 /**//**/try { \

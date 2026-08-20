@@ -15,7 +15,7 @@ namespace kir {
 	 *
 	 * The stopwatch functionality is thread-local and not instance-based:
 	 * only one stopwatch per-thread can run at a time using this namespace.
-	 * 
+	 *
 	 * Use kir::stopwatch() for an instance-based stopwatch.
 	 */
 	namespace clock {
@@ -31,10 +31,10 @@ namespace kir {
 
 		/**
 		* \brief Gets the time since a given epoch.
-		* 
+		*
 		* \param time: Epoch to check against current time.
 		* \param now: Optional override for current Epoch.
-		* 
+		*
 		* \return Time since given Epoch. 0 == Given time > Epoch, 1 == Given time == Epoch.
 		*/
 		[[nodiscard("kir::clock::time_since() is useless without use of its return value.")]]
@@ -50,10 +50,10 @@ namespace kir {
 		/**
 		* \brief Stops the stopwatch.
 		*
-		* \param outTime: Duration in milliseconds.
+		* \param out_time: Duration in milliseconds.
 		* \return True if stopped, false if stopwatch hasn't been started.
 		*/
-		bool stopwatch_stop(kir::time& outTime) noexcept;
+		bool stopwatch_stop(kir::time& out_time) noexcept;
 
 		/**
 		* \brief Checks to see if the stopwatch has been started.
@@ -70,7 +70,7 @@ namespace kir {
 	 * \brief A simple thread-safe stopwatch for measuring elapsed time.
 	 * The stopwatch measures elapsed time in milliseconds from the moment it
 	 * is constructed or last restarted.
-	 * 
+	 *
 	 * This class is thread-safe: all operations may be called from multiple
 	 * threads concurrently.
 	 */
@@ -89,7 +89,7 @@ namespace kir {
 		 * The stopwatch begins timing from the moment of construction.
 		 * The initial state is running.
 		 */
-		[[nodiscard("stopwatch::stopwatch() is a constructor and is pointless without use of its return value.")]]
+		[[nodiscard("kir::stopwatch::stopwatch() is a constructor and is pointless without use of its return value.")]]
 		stopwatch() noexcept;
 	public:
 		/**

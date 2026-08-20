@@ -5,8 +5,9 @@
 
 #include <cctype> // std::isalpha, std::isdigit
 
-static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 7, "Library version mismatch between source and kirkode.h");
+static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 8, "Library version mismatch between source and kirkode.h");
 
+// Constructors
 namespace kir {
 	kson_member::kson_member() noexcept {}
 	kson_member::kson_member(const std::string& name, const kson_type expectedType, const size_t contentSize, const std::string& content) noexcept
@@ -30,6 +31,7 @@ namespace kir {
 	}
 }
 
+// Builder
 namespace kir {
 	bool kson_builder_member::allocate_builder() noexcept {
 		try {
@@ -50,6 +52,7 @@ namespace kir {
 	}
 }
 
+// Serialization
 namespace kir {
 	bool kson::is_legal_member_name(const std::string& name) noexcept {
 		if (name.empty()) return false;
@@ -111,7 +114,7 @@ namespace kir {
 				builder.content.push_back(c);
 				--contentRemaining;
 				if (contentRemaining == 0) {
-					if (!K_NOEXCEPT(out.members.push_back(static_cast<kson_member>(builder)))) return false;
+					if (!K_NOEXCEPT(out._members.push_back(static_cast<kson_member>(builder)))) return false;
 					builder.clear();
 					ccc = 0;
 				}
@@ -142,7 +145,7 @@ namespace kir {
 						builder.content_size = contentSize;
 						contentRemaining = contentSize;
 						if (contentSize == 0) {
-							if (!K_NOEXCEPT(out.members.push_back(static_cast<kson_member>(builder)))) return false;
+							if (!K_NOEXCEPT(out._members.push_back(static_cast<kson_member>(builder)))) return false;
 							builder.clear();
 							ccc = 0;
 						}
@@ -163,24 +166,29 @@ namespace kir {
 	}
 }
 
+// Operations
 namespace kir {
 	bool kson::reserve(const size_t newCapacity) noexcept {
-		return K_NOEXCEPT(members.reserve(newCapacity));
+		return K_NOEXCEPT(_members.reserve(newCapacity));
 	}
 	bool kson::add_member(const std::string& name, const kson_type expectedType, const std::string& content) noexcept {
 		const size_t contentSize = content.size();
 		if (contentSize == 0) return false;
 		if (!is_legal_member_name(name)) return false;
-		return K_NOEXCEPT(members.push_back(kson_member(name, expectedType, contentSize, content)));
+		return K_NOEXCEPT(_members.push_back(kson_member(name, expectedType, contentSize, content)));
 	}
 	bool kson::add_member(const std::string& name, const std::string& content) noexcept {
 		return add_member(name, kson_type::UNSPECIFIED, content);
 	}
 	void kson::clear() noexcept {
-		std::vector<kson_member>().swap(members);
+		std::vector<kson_member>().swap(_members);
 	}
+}
+
+// Getters
+namespace kir {
 	const kson_member* kson::get_member(const std::string& name) const noexcept {
-		for (const kson_member& member : members) {
+		for (const kson_member& member : _members) {
 			if (member.name == name) {
 				return &member;
 			}
@@ -188,9 +196,9 @@ namespace kir {
 		return nullptr;
 	}
 	const std::vector<kson_member>& kson::get_members() const noexcept {
-		return members;
+		return _members;
 	}
 	size_t kson::get_member_count() const noexcept {
-		return members.size();
+		return _members.size();
 	}
 }

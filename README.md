@@ -1,4 +1,4 @@
-# KirKode Library v2.7
+# KirKode Library v2.8
 This is a static library built and maintained by Nathan Kirby for various projects under development by **KirKode Development**.
 
 ## Requirements

@@ -15,7 +15,7 @@ namespace kir {
 	 * and moving or renaming filesystem entries.
 	 *
 	 * This class is thread-safe and does not require instantiation.
-	 * 
+	 *
 	 * Note: Requires C++17 or later due to use of std::filesystem.
 	 */
 	namespace io {
@@ -95,11 +95,11 @@ namespace kir {
 		* \brief Reads binary data from a file.
 		*
 		* \param path: The path of the file to read.
-		* \param outBinary: The buffer to store the read binary data.
+		* \param out_binary: The buffer to store the read binary data.
 		*
 		* \return true if successful, false if otherwise.
 		*/
-		static bool read_binary(const std::string& path, kir::bytes& outBinary) noexcept {
+		static bool read_binary(const std::string& path, kir::bytes& out_binary) noexcept {
 			try {
 				std::ifstream file(path, std::ios::binary);
 				if (!file) return false;
@@ -107,9 +107,9 @@ namespace kir {
 				const int64_t size = static_cast<int64_t>(file.tellg());
 				if (size < 0) return false;
 				file.seekg(0, std::ios::beg);
-				outBinary.resize(static_cast<size_t>(size));
+				out_binary.resize(static_cast<size_t>(size));
 				if (size > 0) {
-					file.read(reinterpret_cast<char*>(outBinary.data()), size);
+					file.read(reinterpret_cast<char*>(out_binary.data()), size);
 				}
 				return file.good() || file.eof();
 			}
@@ -120,11 +120,11 @@ namespace kir {
 		* \brief Reads text data from a file.
 		*
 		* \param path: The path of the file to read.
-		* \param outText: The string to store the read text data.
+		* \param out_text: The string to store the read text data.
 		*
 		* \return true if successful, false if otherwise.
 		*/
-		static bool read_text(const std::string& path, std::string& outText) noexcept {
+		static bool read_text(const std::string& path, std::string& out_text) noexcept {
 			try {
 				std::ifstream file(path);
 				if (!file) return false;
@@ -132,8 +132,8 @@ namespace kir {
 				const int64_t size = static_cast<int64_t>(file.tellg());
 				if (size < 0) return false;
 				file.seekg(0, std::ios::beg);
-				outText.resize(static_cast<size_t>(size));
-				if (!file.read(&outText[0], size) && size > 0) return false;
+				out_text.resize(static_cast<size_t>(size));
+				if (!file.read(&out_text[0], size) && size > 0) return false;
 				return true;
 			}
 			catch (...) { return false; }
@@ -208,20 +208,20 @@ namespace kir {
 		* directory, or a full path, which moves the entry while renaming it.
 		*
 		* \param path: The path of the file or directory to rename.
-		* \param newName: The new name or destination path.
+		* \param new_name: The new name or destination path.
 		*
 		* \return true if successful, false if otherwise.
 		*/
-		static bool rename(const std::string& path, const std::string& newName) noexcept {
+		static bool rename(const std::string& path, const std::string& new_name) noexcept {
 			try {
 				const std::filesystem::path p = path;
 				std::error_code ec;
 				if (!std::filesystem::exists(p, ec)) return false;
-				std::filesystem::path newPath = newName;
-				if (newPath.has_filename() && newPath.parent_path().empty()) {
-					newPath = p.parent_path() / newPath;
+				std::filesystem::path new_path = new_name;
+				if (new_path.has_filename() && new_path.parent_path().empty()) {
+					new_path = p.parent_path() / new_path;
 				}
-				std::filesystem::rename(p, newPath, ec);
+				std::filesystem::rename(p, new_path, ec);
 				return !ec;
 			}
 			catch (...) { return false; }
@@ -231,14 +231,14 @@ namespace kir {
 		* \brief Moves a file or directory to a new location.
 		*
 		* \param path: The path of the file or directory to move.
-		* \param newPath: The destination path.
+		* \param new_path: The destination path.
 		*
 		* \return true if successful, false if otherwise.
 		*/
-		static bool move(const std::string& path, const std::string& newPath) noexcept {
+		static bool move(const std::string& path, const std::string& new_path) noexcept {
 			try {
 				const std::filesystem::path from = path;
-				const std::filesystem::path to = newPath;
+				const std::filesystem::path to = new_path;
 				if (!std::filesystem::exists(from)) return false;
 				std::filesystem::rename(from, to);
 				return true;

@@ -2,14 +2,16 @@
 
 #include <chrono>
 
-static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 7, "Library version mismatch between source and kirkode.h");
+static_assert(KIR_VERSION_MAJOR == 2 && KIR_VERSION_MINOR == 8, "Library version mismatch between source and kirkode.h");
 
+// Internal
 namespace kir {
 	namespace clock {
 		static thread_local kir::time epoch = 0;
 	}
 }
 
+// kir::clock
 namespace kir {
 	namespace clock {
 		kir::time get_epoch() noexcept {
@@ -44,6 +46,7 @@ namespace kir {
 	}
 }
 
+// kir::stopwatch
 namespace kir {
 	stopwatch::stopwatch() noexcept : _running(true), _start(clock::get_epoch()) {}
 	kir::time stopwatch::stop() noexcept {

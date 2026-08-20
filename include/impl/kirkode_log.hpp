@@ -1,9 +1,11 @@
 #pragma once
 #ifndef KIR_EXCLUDE_LOG
-#include <string> // std::string.
-#include <exception> // std::exception.
+#include "kirkode_types.h"
+
+#include <string>
+#include <exception>
 #include <iostream>
-#include <cstdint> // uint8_t
+#include <cstdint>
 
 #ifdef KIR_LOG_THREADED
 #include <mutex>
@@ -83,14 +85,14 @@ namespace kir {
 		* \brief Logs a message in the console with optional new line.
 		*
 		* \param message: String message to log.
-		* \param newLine: If true, end line after message. If false, do not end line.
+		* \param new_line: If true, end line after message. If false, do not end line.
 		*/
-		static void msg(const std::string& message, bool newLine) noexcept {
+		static void msg(const std::string& message, bool new_line) noexcept {
 #ifdef KIR_LOG_THREADED
 			std::lock_guard<std::mutex> lock(_lock);
 #endif
 			std::cout << message;
-			if (newLine) std::cout << std::endl;
+			if (new_line) std::cout << std::endl;
 		}
 
 		/**
@@ -101,41 +103,41 @@ namespace kir {
 		* \param foreground: Color of the text.
 		* \param background: Color of the background behind the text.
 		* \param style: Style of the text.
-		* \param newLine: If true, end line after message. If false, do not end line.
+		* \param new_line: If true, end line after message. If false, do not end line.
 		*/
 		static void msg(
 			const std::string& message,
 			log_clr foreground,
 			log_bkg background = log_bkg::NONE,
 			log_sty style = log_sty::NONE,
-			bool newLine = true
+			bool new_line = true
 		) noexcept {
 #ifdef KIR_LOG_THREADED
 			std::lock_guard<std::mutex> lock(_lock);
 #endif
-			bool textChanged = false;
+			bool text_changed = false;
 			std::string ansi = "\033[";
 			if (style != log_sty::NONE) {
 				ansi += std::to_string(static_cast<unsigned>(style));
-				textChanged = true;
+				text_changed = true;
 			}
 			if (foreground != log_clr::NONE) {
-				if (textChanged) ansi += ';';
+				if (text_changed) ansi += ';';
 				ansi += std::to_string(static_cast<unsigned>(foreground));
-				textChanged = true;
+				text_changed = true;
 			}
 			if (background != log_bkg::NONE) {
-				if (textChanged) ansi += ';';
+				if (text_changed) ansi += ';';
 				ansi += std::to_string(static_cast<unsigned>(background));
-				textChanged = true;
+				text_changed = true;
 			}
-			if (textChanged) {
+			if (text_changed) {
 				ansi += 'm';
 				std::cout << ansi;
 			}
 			std::cout << message;
-			if (textChanged) std::cout << "\033[0m";
-			if (newLine) std::cout << std::endl;
+			if (text_changed) std::cout << "\033[0m";
+			if (new_line) std::cout << std::endl;
 		}
 
 		/**

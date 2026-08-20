@@ -90,16 +90,14 @@ namespace kir {
 		 * \brief Constructs a KSON member with the specified content size.
 		 *
 		 * \param name: Name of the member.
-		 * \param expectedType: Expected type of the member's content.
-		 * \param contentSize: Size of the content.
+		 * \param expected_type: Expected type of the member's content.
+		 * \param content_size: Size of the content.
 		 * \param content: Content of the member.
-		 *
-		 * \note contentSize should correspond to content.size().
 		 */
 		kson_member(
 			const std::string& name,
-			const kson_type expectedType,
-			const size_t contentSize,
+			const kson_type expected_type,
+			const size_t content_size,
 			const std::string& content
 		) noexcept;
 
@@ -107,7 +105,7 @@ namespace kir {
 		 * \brief Constructs a KSON member and determines the content size automatically.
 		 *
 		 * \param name: Name of the member.
-		 * \param expectedType: Expected type of the member's content.
+		 * \param expected_type: Expected type of the member's content.
 		 * \param content: Content of the member.
 		 *
 		 * \details
@@ -115,7 +113,7 @@ namespace kir {
 		 */
 		kson_member(
 			const std::string& name,
-			const kson_type expectedType,
+			const kson_type expected_type,
 			const std::string& content
 		) noexcept;
 
@@ -145,7 +143,7 @@ namespace kir {
 
 	/**
 	 * \brief Internal member type used while constructing a KSON object from serialized data.
-	 * 
+	 *
 	 * This type is primarily intended for use by the KSON implementation
 	 * and is not normally required when constructing KSON data manually.
 	 */
@@ -198,30 +196,31 @@ namespace kir {
 	 */
 	class kson {
 	private:
-		std::vector<kson_member> members;
+		// Array of kson members.
+		std::vector<kson_member> _members;
 	public:
 		/**
 		 * \brief Reserves capacity for KSON members.
 		 *
-		 * \param newCapacity: Number of members to reserve space for.
+		 * \param new_capacity: Number of members to reserve space for.
 		 *
 		 * \return true if the requested capacity was successfully reserved,
 		 * false if memory allocation failed.
 		 */
-		bool reserve(const size_t newCapacity) noexcept;
+		bool reserve(const size_t new_capacity) noexcept;
 
 		/**
 		 * \brief Adds a member to the KSON object.
 		 *
 		 * \param name: Name of the member.
-		 * \param expectedType: Expected type of the member's content.
+		 * \param expected_type: Expected type of the member's content.
 		 * \param content: Content of the member.
 		 *
 		 * \return true if the member was successfully added, false otherwise.
 		 */
 		bool add_member(
 			const std::string& name,
-			const kson_type expectedType,
+			const kson_type expected_type,
 			const std::string& content
 		) noexcept;
 
